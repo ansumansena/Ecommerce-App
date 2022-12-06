@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { sliderItems } from "../data";
 import { useState } from "react";
 import { mobile } from "../responsive";
+import { Link } from "react-router-dom";
 
 const Container = styled.div`
   width: 100%;
@@ -101,7 +102,9 @@ const Slider = () => {
             <InfoContainer>
               <Title>{item.title}</Title>
               <Desc>{item.desc}</Desc>
-              <Button>Buy Now</Button>
+              <Link to="/products">
+                <Button>Buy Now</Button>
+              </Link>
             </InfoContainer>
           </Slide>
         ))}
