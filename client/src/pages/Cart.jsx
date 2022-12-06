@@ -5,6 +5,14 @@ import Announcement from "../components/Announcement";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { mobile } from "../responsive";
+import StripeCheckout from "react-stripe-checkout";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { userRequest } from "../requestMethod";
+const vibebuylogo = require("../vibebuylogo.jpg");
+
+
+const KEY = "pk_test_51M6yZBSFADHBhWn7EitMdqa1lIjfVs7tfAjxMFqhSMaDJVYFU93sAllxsoI8LHzr8N8z5ny3E7d0QvAo5vH5ITih00KC9FKbfp";
 
 const Container = styled.div``;
 
@@ -179,6 +187,30 @@ const Button = styled.button`
 
 const Cart = () => {
   const cart = useSelector((state) => state.cart);
+  const [stripeToken, setStripeToken] = useState(null);
+  const navigate = useNavigate()
+
+  const onToken = (token) => {
+    setStripeToken(token);
+  };
+
+  useEffect(() => {
+    const makeRequest = async () => {
+      try {
+        const res = await userRequest.post("/checkout/payment", {
+          tokenId: stripeToken.id,
+          amount: cart.total * 100,
+        });
+        navigate("/success", {
+          stripeData: res.data,
+          products: cart,
+        });
+      } catch { }
+    };
+    stripeToken && makeRequest();
+  }, [stripeToken, cart, navigate]);
+
+
   return (
     <Container>
       <Navbar />
@@ -248,7 +280,18 @@ const Cart = () => {
               <SummaryItemText>Total</SummaryItemText>
               <SummaryItemPrice>${cart.total}</SummaryItemPrice>
             </SummaryItem>
-            <Button>CHECKOUT NOW</Button>
+            <StripeCheckout
+              name="VIBEBUY"
+              image={vibebuylogo}
+              billingAddress
+              shippingAddress
+              description={`Your total is $${cart.total}`}
+              amount={cart.total * 100}
+              token={onToken}
+              stripeKey={KEY}
+            >
+              <Button>CHECKOUT NOW</Button>
+            </StripeCheckout>
           </Summary>
         </Bottom>
       </Wrapper>
